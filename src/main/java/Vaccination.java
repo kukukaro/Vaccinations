@@ -9,7 +9,9 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Vaccination {
     public static void main(String[] args) {
@@ -35,7 +37,7 @@ public class Vaccination {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n");
                 String vaccinationDateString = record.get("pj_data_szczepienia");
                 LocalDateTime vaccinationDate;
-                if (vaccinationDateString == null || vaccinationDateString.isEmpty()) {
+                if (isEmpty(vaccinationDateString)) {
                     vaccinationDate = null;
                 } else {
                     vaccinationDate = LocalDateTime.parse(vaccinationDateString, formatter);
@@ -43,7 +45,7 @@ public class Vaccination {
 
                 LocalDateTime cancellationDate;
                 String cancellationDateString = record.get("pj_data_anulowania");
-                if (cancellationDateString == null || cancellationDateString.isEmpty()) {
+                if (isEmpty(cancellationDateString)) {
                     cancellationDate = null;
                 } else {
                     cancellationDate = LocalDateTime.parse(cancellationDateString, formatter);
@@ -58,11 +60,44 @@ public class Vaccination {
             }
 
             System.out.println("Number of events: " + events.size());
+            analyze(events, analyzedMonth);
 
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
+    }
+
+    private static void analyze(List<Event> events, int analyzedMonth) {
+        Map<String, List<Event>> eventsByNurseId = new HashMap<>();
+        for (Event event : events) {
+            String nurseId = event.getNurseId();
+            if(isEmpty(nurseId) && event.getVaccinationDate() != null) {
+                System.err.println("Bledne dane - brak pielegniarki dla szczepenia");
+            } else {
+                if(!eventsByNurseId.containsKey(nurseId)) {
+                    eventsByNurseId.put(nurseId, new ArrayList<>());
+                }
+                eventsByNurseId.get(nurseId).add(event);
+            }
+        }
+        System.out.println("Szczepienia wg pielegniarki:");
+        System.out.println("ID\tszczepien\tw tym wyjazdowych");
+        int allVaccinations = 0;
+        int allMobiles = 0;
+        for (String nurseId : eventsByNurseId.keySet()) {
+            List<Event> nurseEvents = eventsByNurseId.get(nurseId);
+            int vaccinations = nurseEvents.size();
+            allVaccinations+=vaccinations;
+            long mobileVacs = nurseEvents.stream().filter(Event::isMobile).count();
+            allMobiles += mobileVacs;
+            System.out.println(nurseId+"\t"+vaccinations+"\t"+mobileVacs);
+        }
+        System.out.println("\nWszystkich szczepien: "+allVaccinations + " w tym wyjazdowych: "+allMobiles);
+    }
+
+    private static boolean isEmpty(String nurseId) {
+        return nurseId == null || nurseId.isEmpty();
     }
 
     private static void validateInput(Path reportLocation, int analyzedMonth) {
