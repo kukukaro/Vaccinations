@@ -17,6 +17,9 @@ public class Event {
         this.productName = productName;
     }
 
+    public boolean isMobile() {
+        return productCode.equals("99.03.0803");
+    }
     public String getNurseId() {
         return nurseId;
     }

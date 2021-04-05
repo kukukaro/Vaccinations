@@ -27,12 +27,12 @@ public class Vaccination {
 
     private static void runAnalysis(Path reportLocation, int analyzedMonth) {
         try (Reader reader = Files.newBufferedReader(reportLocation)) {
-            CSVParser parser = new CSVParser(reader, CSVFormat.RFC4180.withFirstRecordAsHeader());
+            CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withDelimiter(';').withFirstRecordAsHeader());
 
             List<Event> events = new ArrayList<>();
             for (CSVRecord record : parser) {
                 String nurseId = record.get("pm_ext");
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-dd");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.n");
                 String vaccinationDateString = record.get("pj_data_szczepienia");
                 LocalDateTime vaccinationDate;
                 if (vaccinationDateString == null || vaccinationDateString.isEmpty()) {
@@ -60,6 +60,7 @@ public class Vaccination {
             System.out.println("Number of events: " + events.size());
 
         } catch (Exception ex) {
+            System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
     }
