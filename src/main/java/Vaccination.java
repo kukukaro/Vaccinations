@@ -61,7 +61,7 @@ public class Vaccination {
                 events.add(event);
             }
 
-            System.out.println("Number of events: " + events.size());
+            //System.out.println("Number of events: " + events.size());
             events = filterByMonth(events, analyzedMonth);
             analyze(events);
 
@@ -116,7 +116,7 @@ public class Vaccination {
             allMobiles += mobileVacs;
             System.out.println(nurseId+"\t"+vaccinations+"\t"+mobileVacs);
         }
-        System.out.println("\nWszystkich szczepien: "+allVaccinations + " w tym wyjazdowych: "+allMobiles);
+        System.out.println("\nWszystkich szczepien: "+allVaccinations + " w tym wyjazdowych: "+allMobiles+"\n");
     }
 
     private static boolean isEmpty(String nurseId) {
