@@ -7,11 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Vaccination {
     public static void main(String[] args) {
@@ -60,7 +62,8 @@ public class Vaccination {
             }
 
             System.out.println("Number of events: " + events.size());
-            analyze(events, analyzedMonth);
+            events = filterByMonth(events, analyzedMonth);
+            analyze(events);
 
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
@@ -68,13 +71,33 @@ public class Vaccination {
         }
     }
 
-    private static void analyze(List<Event> events, int analyzedMonth) {
+    private static List<Event> filterByMonth(List<Event> events, int analyzedMonth) {
+        String eventMonth = "2021-" + (analyzedMonth < 10 ? "0" + analyzedMonth : analyzedMonth);
+        Month expectedMonth = Month.of(analyzedMonth);
+        return events.stream()
+                .filter(event -> event.getMonth().equals(eventMonth))
+                .map(event -> {
+                    if(event.getVaccinationDate() != null) {
+                        LocalDateTime vacDate = event.getVaccinationDate();
+                        if(!vacDate.getMonth().equals(expectedMonth)) {
+                            System.err.println("Miesiac szczepenia nie zgadza sie z okresem rozliczeniowym");
+                        }
+                    }
+                    return event;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private static void analyze(List<Event> events) {
         Map<String, List<Event>> eventsByNurseId = new HashMap<>();
         for (Event event : events) {
             String nurseId = event.getNurseId();
             if(isEmpty(nurseId) && event.getVaccinationDate() != null) {
                 System.err.println("Bledne dane - brak pielegniarki dla szczepenia");
             } else {
+                if(isEmpty(nurseId)) {
+                    continue;
+                }
                 if(!eventsByNurseId.containsKey(nurseId)) {
                     eventsByNurseId.put(nurseId, new ArrayList<>());
                 }
