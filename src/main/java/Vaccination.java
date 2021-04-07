@@ -25,11 +25,16 @@ public class Vaccination {
         Path reportLocation = Paths.get(args[0]);
         int analyzedMonth = Integer.parseInt(args[1]);
 
-        validateInput(reportLocation, analyzedMonth);
-        runAnalysis(reportLocation, analyzedMonth);
+        runInternal(reportLocation, analyzedMonth);
     }
 
-    private static void runAnalysis(Path reportLocation, int analyzedMonth) {
+    protected static Report runInternal(Path reportLocation, int analyzedMonth) {
+        validateInput(reportLocation, analyzedMonth);
+        return runAnalysis(reportLocation, analyzedMonth);
+
+    }
+
+    private static Report runAnalysis(Path reportLocation, int analyzedMonth) {
         try (Reader reader = Files.newBufferedReader(reportLocation)) {
             CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withDelimiter(';').withFirstRecordAsHeader());
 
@@ -63,12 +68,13 @@ public class Vaccination {
 
             //System.out.println("Number of events: " + events.size());
             events = filterByMonth(events, analyzedMonth);
-            analyze(events);
+             return analyze(events, analyzedMonth);
 
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
+        return null;
     }
 
     private static List<Event> filterByMonth(List<Event> events, int analyzedMonth) {
@@ -88,7 +94,7 @@ public class Vaccination {
                 .collect(Collectors.toList());
     }
 
-    private static void analyze(List<Event> events) {
+    private static Report analyze(List<Event> events, int month) {
         Map<String, List<Event>> eventsByNurseId = new HashMap<>();
         for (Event event : events) {
             String nurseId = event.getNurseId();
@@ -104,19 +110,18 @@ public class Vaccination {
                 eventsByNurseId.get(nurseId).add(event);
             }
         }
-        System.out.println("Szczepienia wg pielegniarki:");
-        System.out.println("ID\tszczepien\tw tym wyjazdowych");
-        int allVaccinations = 0;
-        int allMobiles = 0;
+
+        Report report = new Report();
+        report.setMonth(month);
+
         for (String nurseId : eventsByNurseId.keySet()) {
             List<Event> nurseEvents = eventsByNurseId.get(nurseId);
             int vaccinations = nurseEvents.size();
-            allVaccinations+=vaccinations;
-            long mobileVacs = nurseEvents.stream().filter(Event::isMobile).count();
-            allMobiles += mobileVacs;
-            System.out.println(nurseId+"\t"+vaccinations+"\t"+mobileVacs);
+            int mobileVacs = (int) nurseEvents.stream().filter(Event::isMobile).count();
+            report.registerNextNurse(nurseId, vaccinations, mobileVacs);
         }
-        System.out.println("\nWszystkich szczepien: "+allVaccinations + " w tym wyjazdowych: "+allMobiles+"\n");
+        report.print();
+        return report;
     }
 
     private static boolean isEmpty(String nurseId) {
