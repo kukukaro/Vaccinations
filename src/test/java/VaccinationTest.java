@@ -17,10 +17,12 @@ public class VaccinationTest {
         int month = 3;
 
         Report report = Vaccination.runInternal(testFile, month);
+        Report expectedReport = new Report();
+        expectedReport.registerNextNurse("1P-Mus",4,0);
+        expectedReport.registerNextNurse("1P-Kuk",3,1);
+        expectedReport.setMonth(month);
 
-        assertThat(report.getMonth()).isEqualTo(month);
-        assertThat(report.getAllVaccinations()).isEqualTo(7);
-        assertThat(report.getAllMobileVaccination()).isEqualTo(1);
-        report.hashCode();
+        assertThat(report).isEqualTo(expectedReport);
+
     }
 }

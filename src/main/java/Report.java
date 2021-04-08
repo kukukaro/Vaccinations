@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Report {
     private int month;
@@ -12,6 +13,21 @@ public class Report {
         private String id;
         private int vaccinations;
         private int mobileVaccinations;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NurseReport that = (NurseReport) o;
+            return vaccinations == that.vaccinations &&
+                    mobileVaccinations == that.mobileVaccinations &&
+                    Objects.equals(id, that.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, vaccinations, mobileVaccinations);
+        }
     }
 
     public void registerNextNurse(String id, int vaccinations, int mobileVaccination) {
@@ -51,5 +67,21 @@ public class Report {
 
     public List<NurseReport> getNurses() {
         return nurses;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Report report = (Report) o;
+        return month == report.month &&
+                allVaccinations == report.allVaccinations &&
+                allMobileVaccination == report.allMobileVaccination &&
+                Objects.equals(nurses, report.nurses);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(month, allVaccinations, allMobileVaccination, nurses);
     }
 }
