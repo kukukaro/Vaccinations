@@ -1,6 +1,7 @@
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -11,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaccinationTest {
 
     @Test
-    public void shouldCountVaccinationFromCsvFile() throws URISyntaxException {
+    public void shouldCountVaccinationFromCsvFile() throws URISyntaxException, IOException {
         URI testFileLocation = VaccinationTest.class.getResource("test_data.csv").toURI();
         Path testFile = Paths.get(testFileLocation);
         int month = 3;
@@ -23,6 +24,10 @@ public class VaccinationTest {
         expectedReport.setMonth(month);
 
         assertThat(report).isEqualTo(expectedReport);
+    }
 
+    @Test
+    public void shouldNotifyInvalidMonth() {
+        
     }
 }

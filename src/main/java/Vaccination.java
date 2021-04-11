@@ -1,7 +1,10 @@
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +19,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Vaccination {
+    private  static Logger logger = LoggerFactory.getLogger(Vaccination.class);
+
     public static void main(String[] args) {
         if (args.length != 2) {
             System.out.println("Proszę podać ścieżkę do pliku oraz numer miesiąca do analizy (np. 3 - marzec)");
@@ -25,16 +30,21 @@ public class Vaccination {
         Path reportLocation = Paths.get(args[0]);
         int analyzedMonth = Integer.parseInt(args[1]);
 
-        runInternal(reportLocation, analyzedMonth);
+        try {
+            runInternal(reportLocation, analyzedMonth);
+        } catch (IOException e) {
+            logger.error("Blad wykonania programu", e);
+            System.exit(4);
+        }
     }
 
-    protected static Report runInternal(Path reportLocation, int analyzedMonth) {
+    protected static Report runInternal(Path reportLocation, int analyzedMonth) throws IOException {
         validateInput(reportLocation, analyzedMonth);
         return runAnalysis(reportLocation, analyzedMonth);
 
     }
 
-    private static Report runAnalysis(Path reportLocation, int analyzedMonth) {
+    private static Report runAnalysis(Path reportLocation, int analyzedMonth) throws IOException {
         try (Reader reader = Files.newBufferedReader(reportLocation)) {
             CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withDelimiter(';').withFirstRecordAsHeader());
 
@@ -66,15 +76,10 @@ public class Vaccination {
                 events.add(event);
             }
 
-            //System.out.println("Number of events: " + events.size());
+            logger.info("Ilosc rekordow zaimportowana z pliku {}", events.size());
             events = filterByMonth(events, analyzedMonth);
              return analyze(events, analyzedMonth);
-
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-            ex.printStackTrace();
         }
-        return null;
     }
 
     private static List<Event> filterByMonth(List<Event> events, int analyzedMonth) {
@@ -86,7 +91,7 @@ public class Vaccination {
                     if(event.getVaccinationDate() != null) {
                         LocalDateTime vacDate = event.getVaccinationDate();
                         if(!vacDate.getMonth().equals(expectedMonth)) {
-                            System.err.println("Miesiac szczepenia nie zgadza sie z okresem rozliczeniowym");
+                            logger.warn("Miesiac szczepenia nie zgadza sie z okresem rozliczeniowym");
                         }
                     }
                     return event;
@@ -99,7 +104,7 @@ public class Vaccination {
         for (Event event : events) {
             String nurseId = event.getNurseId();
             if(isEmpty(nurseId) && event.getVaccinationDate() != null) {
-                System.err.println("Bledne dane - brak pielegniarki dla szczepenia");
+                logger.error("Bledne dane - brak pielegniarki dla szczepenia");
             } else {
                 if(isEmpty(nurseId)) {
                     continue;
