@@ -11,10 +11,16 @@ public class Report {
     private List<NurseReport> nurses = new ArrayList<>();
 
 
-    private static class NurseReport{
+    protected static class NurseReport{
         private String id;
         private int vaccinations;
         private int mobileVaccinations;
+
+        public NurseReport(String id, int vaccinations, int mobileVaccinations) {
+            this.id = id;
+            this.vaccinations = vaccinations;
+            this.mobileVaccinations = mobileVaccinations;
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -33,10 +39,8 @@ public class Report {
     }
 
     public void registerNextNurse(String id, int vaccinations, int mobileVaccination) {
-        NurseReport nurseReport = new NurseReport();
-        nurseReport.id = id;
-        nurseReport.vaccinations = vaccinations;
-        nurseReport.mobileVaccinations = mobileVaccination;
+        NurseReport nurseReport = new NurseReport(id, vaccinations, mobileVaccination);
+
         nurses.add(nurseReport);
         allVaccinations += vaccinations;
         allMobileVaccination += mobileVaccination;

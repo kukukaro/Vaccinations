@@ -2,6 +2,8 @@ package kukukaro.vaccinations;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -13,9 +15,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class VaccinationTest {
+    private  static Logger logger = LoggerFactory.getLogger(VaccinationTest.class);
 
     @Test
     public void shouldCountVaccinationFromCsvFile() throws URISyntaxException, IOException, InvalidInputException {
+        logger.info("Test name: shouldCountVaccinationFromCsvFile");
         URI testFileLocation = VaccinationTest.class.getResource("test_data.csv").toURI();
         Path testFile = Paths.get(testFileLocation);
         int month = 3;
@@ -31,6 +35,7 @@ public class VaccinationTest {
 
     @Test
     public void shouldNotifyInvalidMonth() {
+        logger.info("Test name: shouldNotifyInvalidMonth");
         Path anyFile = Mockito.mock(Path.class);
         int month = 0;
 
@@ -42,6 +47,7 @@ public class VaccinationTest {
 
     @Test
     public void shouldNotifyMissingFile() {
+        logger.info("Test name: shouldNotifyMissingFile");
         Path missingFile = Paths.get("missingFile.csv");
 
         assertThatThrownBy(() -> Vaccination.runInternal(missingFile, 3))
