@@ -1,8 +1,8 @@
-import org.assertj.core.api.Assertions;
+package kukukaro.vaccinations;
+
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.imageio.IIOException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,6 +49,6 @@ public class VaccinationTest {
                 .hasMessageContaining("Brak pliku")
                 .hasMessageContaining("missingFile.csv");
     }
-    
-    
+
+
 }

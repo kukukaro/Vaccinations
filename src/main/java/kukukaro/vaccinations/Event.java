@@ -1,3 +1,5 @@
+package kukukaro.vaccinations;
+
 import java.time.LocalDateTime;
 
 public class Event {
