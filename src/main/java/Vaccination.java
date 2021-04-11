@@ -35,10 +35,13 @@ public class Vaccination {
         } catch (IOException e) {
             logger.error("Blad wykonania programu", e);
             System.exit(4);
+        } catch (InvalidInputException e) {
+            logger.warn("Bledne dane wejsciowe programu");
+            System.exit(2);
         }
     }
 
-    protected static Report runInternal(Path reportLocation, int analyzedMonth) throws IOException {
+    protected static Report runInternal(Path reportLocation, int analyzedMonth) throws IOException, InvalidInputException {
         validateInput(reportLocation, analyzedMonth);
         return runAnalysis(reportLocation, analyzedMonth);
 
@@ -133,15 +136,15 @@ public class Vaccination {
         return nurseId == null || nurseId.isEmpty();
     }
 
-    private static void validateInput(Path reportLocation, int analyzedMonth) {
+    private static void validateInput(Path reportLocation, int analyzedMonth) throws InvalidInputException {
         if (analyzedMonth < 1 || analyzedMonth > 12) {
-            System.out.println("Błędny miesiąc: " + analyzedMonth + ". Podaj liczbę 1-12");
-            System.exit(2);
+            logger.warn("Błędny miesiąc: {}. Podaj liczbę 1-12", analyzedMonth);
+            throw new InvalidInputException("Błędny miesiąc: " + analyzedMonth);
         }
 
         if (!Files.exists(reportLocation)) {
-            System.out.println("Brak pliku " + reportLocation.toAbsolutePath());
-            System.exit(2);
+            logger.warn("Brak pliku {}", reportLocation.toAbsolutePath());
+            throw new InvalidInputException("Brak pliku " + reportLocation.toAbsolutePath());
         }
     }
 

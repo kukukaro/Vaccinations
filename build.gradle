@@ -9,14 +9,18 @@ repositories {
     mavenCentral()
 }
 
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
 dependencies {
     implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.19.0'
-
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.9.0'
 }
+
 
 jar {
     manifest {
